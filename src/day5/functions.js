@@ -27,20 +27,24 @@ const part1 = (inputs) => {
 
 /**
  * Algorithm:
- * Calculate the sum of first n natural numbers as sumtotal= n*(n+1)/2
- * Create a variable sum to store the sum of array elements.
+ * Calculate the sum of first n natural numbers as sum= n*(n+1)/2
+ * Create a variable sum to store the total of array elements.
  * Traverse the array from start to end.
- * Update the value of sum as sum = sum + array[i]
- * Return the missing number as sumtotal – sum
+ * Update the value of total as total = total + array[i]
+ * Return the missing number as sum – total
+ * 
+ * Complexity: 
+ * Time: O(n) - one traversal of the array
+ * Space: O(1)
  * 
  * @param {*} arr 
- * @return {int} num
+ * @return {int} missingID
  */
 const findMissingNum = (arr, n) => {
   const sum = n * (n + 1) /2;
   let total = 0;
   arr.forEach(num=> total += num);
-  return sum-total;
+  return sum - total;
 }
 
 const part2 = (inputs) => {
