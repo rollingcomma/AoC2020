@@ -65,12 +65,14 @@ const part1 = (inputs) => {
  * @param {*} rules 
  */
 const countBags = ( key, rules) => {
+  if(!rules[key]) return 1;
+
   let containBagCount = 0;
   for(const prop in rules[key]) {
     if(rules[prop]) { //not the bottom level
       containBagCount += rules[key][prop] * (countBags(prop, rules) + 1);
-    } else { // bottom level - base case to exit recursion
-      containBagCount += rules[key][prop] ;
+    } else { // bottom level
+      containBagCount += rules[key][prop] * countBags(prop, rules);
     }
   }
   return containBagCount;
