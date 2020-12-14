@@ -57,7 +57,7 @@ const part1 = (inputs) => {
 
 /**
  * Description: recursionally traverse rules which can be contained within shiny gold bag
- * count the number of bags each satisfied rules contain
+ * count the number of bags every satisfied rule contains
  * if the bag is at the bottom level - can not contain other bags, count its quantity only
  * otherwise count its quantity plus the quantity times bags it contains inside
  * 
