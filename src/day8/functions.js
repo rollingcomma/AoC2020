@@ -61,18 +61,18 @@ const part1 = (inputs) => {
  * if the bag is at the bottom level - can not contain other bags, count its quantity only
  * otherwise count its quantity plus the quantity times bags it contains inside
  * 
- * @param {string} key 
- * @param {object} rules 
- * 
- * @returns {int} containBagCount
+ * @param {*} key 
+ * @param {*} rules 
  */
 const countBags = ( key, rules) => {
+  if(!rules[key]) return 1;
+
   let containBagCount = 0;
   for(const prop in rules[key]) {
     if(rules[prop]) { //not the bottom level
       containBagCount += rules[key][prop] * (countBags(prop, rules) + 1);
-    } else { // bottom level - base case to exit recursion
-      containBagCount += rules[key][prop] ;
+    } else { // bottom level
+      containBagCount += rules[key][prop] * countBags(prop, rules);
     }
   }
   return containBagCount;
