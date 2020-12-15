@@ -44,7 +44,7 @@ const part2 = (inputs) => {
   let j = inputs.length - 1;
   while (j >= 0) {
     //deep copy nested array, only applicable to array or object with primitive type value
-    let newInputs = JSON.parse(JSON.stringify(inputs));
+    const newInputs = JSON.parse(JSON.stringify(inputs));
     if (newInputs[j][0] === "jmp" ) {
       newInputs[j][0] = "nop";
     } else if (newInputs[j][0] === "nop" && newInputs[j][1] !== 0) {
