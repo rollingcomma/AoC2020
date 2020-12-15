@@ -1,4 +1,4 @@
-const { readInput, part1, part2 } = require('./src/day7/functions');
+const { readInput, part1, part2 } = require('./src/day8/functions');
 
 const inputs = readInput("input.txt");
 //const result = part1(inputs);
