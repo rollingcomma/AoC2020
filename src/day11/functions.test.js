@@ -1,18 +1,25 @@
 const { 
   readInput, 
   part1,
-  factorialCalculator,
-  combinationCalculator,
-  combinasonsMaxGap,
   part2 } = require('./functions');
 
-describe('test day10 solution ', () => {
-  const dataset1 = [16,10,15,5,1,11,7,19,6,12,4];
-  const dataset2 = [28,33,18,42,31,14,46,20,48,47,24,23,49,45,19,38,39,11,1,32,25,35,8,17,7,9,4,2,34,10,3];
+describe('test day11 solution ', () => {
+  const dataset = [
+    ["L",".","L","L",".","L","L",".","L","L"],
+    ["L","L","L","L","L","L","L",".","L","L"],
+    ["L",".","L",".","L",".",".","L",".","."],
+    ["L","L","L","L",".","L","L",".","L","L"],
+    ["L",".","L","L",".","L","L",".","L","L"],
+    ["L",".","L","L","L","L","L",".","L","L"],
+    [".",".","L",".","L",".",".",".",".","."],
+    ["L","L","L","L","L","L","L","L","L","L"],
+    ["L",".","L","L","L","L","L","L",".","L"],
+    ["L",".","L","L","L","L","L",".","L","L"]
+  ];
   
   test('readInput - read file line by line, convert each line to an integer', () => {
-    expect(readInput("testInput1.txt")).toEqual(dataset1);
-    expect(readInput("testInput2.txt")).toEqual(dataset2);
+    expect(readInput("testInput.txt")).toEqual(dataset);
+    
   });
 
   test('part1 -  find the first number in the list which is not the sum of two of the 5 numbers before it', () => {

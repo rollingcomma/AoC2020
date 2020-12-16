@@ -3,7 +3,7 @@ const {
   part1,
   part2 } = require('./functions');
 
-describe('test day8 solution ', () => {
+describe('test day9 solution ', () => {
   const dataset = [35,20,15,25,47,40,62,55,65,95,102,117,150,182,127,219,299,277,309,576];
   
   test('readInput - read file line by line, convert each line to an integer', () => {
