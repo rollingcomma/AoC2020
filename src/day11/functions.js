@@ -4,106 +4,122 @@ const readInput = (file) => {
   try {
     return fs.readFileSync(`${__dirname}/${file}`, 'utf8')
       .split("\n")
-      .map(input => parseInt(input));
+      .map(input => input.split(""));
   } catch (ex) {
     console.log("error read file", ex.message)
   }
 }
 
-const part1 = (inputs) => {
-  //pre-included difference device's built-in adapter and the highest adapter,
-  //which is always 3
-  let countThree = 1, countOne = 0; 
+/**
+ * 
+ * @param {2D array} inputs 
+ * @param {int} row 
+ * @param {int} col 
+ * 
+ * ###############################################
+ * [row-1][col-1] [row-1][col] [row-1][col+1]
+ *  [row][col-1]  ([row][col])  [row][col+1]
+ * [row+1][col-1] [row+1][col] [row+1][col+1]
+ * ###############################################
+ */
+const adjacentOccupiedCount = (inputs, row, col) => {
+  let count = 0;
+  if (col > 0 && row > 0 && inputs[row - 1][col - 1] === "#") count++;
+  if (row > 0 && inputs[row - 1][col] === "#") count++;
+  if (row > 0 && col < (inputs[row].length - 1) && inputs[row - 1][col + 1] === "#") count++;
 
-  /**
-   * Array.sort()
-   * The default sort order is ascending, 
-   * built upon converting the elements into strings, 
-   * then comparing their sequences of UTF-16 code units values.
-   * 
-  */
-  inputs.sort((a, b) => {return a - b});
-  inputs[0] - 0 === 1? countOne++ : countThree++;
-  for(let i = 1; i < inputs.length; i++) {
-    (inputs[i] - inputs[i - 1] === 1 )? countOne++ : countThree++;
-  }
 
-  return countOne * countThree;
-}
-
-const factorialCalculator = (n) => {
-  if(n < 2) return 1;
-  let i = 1; result = 1;
-  while(i <= n) {
-    result *=i;
-    i++;
-  }
-  return result;
-}
-
-const combinationCalculator = (n, r) => {
-  return factorialCalculator(n) / (factorialCalculator(r) * factorialCalculator(n-r));
+  if (col > 0 && inputs[row][col - 1] === "#") count++;
+  if (col < (inputs[row].length - 1) && inputs[row][col + 1] === "#") count++;
+  
+  if (col > 0 && row < (inputs.length - 1) && inputs[row + 1][col - 1] === "#") count++;
+  if (row < (inputs.length - 1) && inputs[row + 1][col] === "#") count++;
+  if (row < (inputs.length - 1) && col < (inputs[row].length - 1) && inputs[row + 1][col + 1] === "#") count++;
+  return count;
 }
 
 /**
- * Description: calculate possible combinasons of a set of contiguous numbers 
- * with maximum difference less than given gap between any adjacent pair of numbers
- * 
- * @param {int} size - number of the elements in the set
- * @param {int} gap - difference between any adjacent pair of numbers
- * @returns {int} combCount
+ *
+ * @param {2D array} inputs
+ * @param {int} row
+ * @param {int} col
+ *
+ * ###############################################
+ * nw n ne
+ * w  _  e
+ * sw s se
+ * ###############################################
  */
-const combinasonsMaxGap = (size, gap) => {
-  let comb = 0;
-  const upper = size - 2;
-  if(upper < gap ) {
-    // i number of selection
-    for(let i  = 0; i <= upper; i++) {
-      comb += combinationCalculator(upper, i)
-    }
-    return comb;
-  }
+const firstSeatOccupiedCount = (inputs, row, col) => {
+  let countDirection = {}, i = 1;
+  let maxRadius = Math.max(row, col, inputs.length-row, inputs.length-col);
+  
+  while (i <= maxRadius) {
+    if (!countDirection["nw"] && (col - i) >= 0 && (row - i) >= 0 && inputs[row - i][col - i] !== ".") countDirection["nw"] = inputs[row - i][col - i];
+    if (!countDirection["n"] && (row - i) >= 0 && inputs[row - i][col] !== ".") countDirection["n"] = inputs[row - i][col];
+    if (!countDirection["ne"] && (row - i) >= 0 && (col + i) < inputs[row].length && inputs[row - i][col + i] !== ".") countDirection["ne"] = inputs[row - i][col + i];
 
-  const lower = Math.ceil((size - 2)/gap);
-  for(let i = upper; i >= lower; i--) {
-    comb += combinationCalculator(upper, i)
+
+    if (!countDirection["w"] && (col - i) >= 0 && inputs[row][col - i] !== ".") countDirection["w"] = inputs[row][col - i];
+    if (!countDirection["e"] && (col + i) < inputs[row].length && inputs[row][col + i] !== ".") countDirection["e"] = inputs[row][col + i];
+
+    if (!countDirection["sw"] && (col - i) >= 0 && (row + i) < inputs.length && inputs[row + i][col - i] !== ".") countDirection["sw"] = inputs[row + i][col - i];
+    if (!countDirection["s"] && (row + i) < inputs.length && inputs[row + i][col] !== ".") countDirection["s"] = inputs[row + i][col];
+    if (!countDirection["se"] && (row + i) < inputs.length && (col + i) < inputs[row].length && inputs[row + i][col + i] !== ".") countDirection["se"] = inputs[row + i][col + i];
+    i++;
   }
-  for (let i = upper-3; i >= lower; i--) {
-    comb -= combinationCalculator(upper-2, i)
-  }
-  return comb;
+  let count = 0;
+  Object.values(countDirection).forEach(value => {if(value === "#") count++});
+  return count;
 }
 
-const part2 = (inputs) => {
-  let arrangement = 1, contiguousOne = 0;
-  //insert rating of charging outlet
-  inputs.push(0); 
-  inputs.sort((a, b) => { return a - b });
-  //insert rating of device's built in adapter
-  inputs.push(inputs[inputs.length-1] + 3);
-  for (let i = 1; i < inputs.length; i++) {
-    if (inputs[i] - inputs[i - 1] === 1) {
-      contiguousOne++;
-    } else {
-      switch(contiguousOne) {
-        case 0:
-        case 1: break;
-        case 2: 
-          arrangement *= 2;
-          break;
-        default: 
-          arrangement *= combinasonsMaxGap(contiguousOne+1, 3)
-      }
-      contiguousOne = 0;
+const occupiedCount = (inputs) => {
+  let count = 0;
+  for (let row = 0; row < inputs.length; row++) {
+    for (let col = 0; col < inputs[row].length; col++) {
+      if(inputs[row][col] === "#") count++;
     }
   }
-  return arrangement;
+  return count;
+}
+
+const simulateSeating = (inputs, countFunc, occupiedNum) => {
+  let outputs = JSON.parse(JSON.stringify(inputs));
+  let stateChange, previous;
+  
+  do {
+    previous = JSON.parse(JSON.stringify(outputs));
+    stateChange = false;
+    for (let row = 0; row < previous.length; row++) {
+      for (let col = 0; col < previous[row].length; col++) {
+        if (previous[row][col] === "L" && countFunc(previous, row, col) === 0) {
+          outputs[row][col] = "#";
+          stateChange = true;
+        } else if (previous[row][col] === "#" && countFunc(previous, row, col) > occupiedNum ) {
+          outputs[row][col] = "L";
+          stateChange = true;
+        }
+      }
+    }
+  } while (stateChange);
+  return outputs;
+}
+
+const part1 = (inputs) => {
+  const newInputs = simulateSeating(inputs, adjacentOccupiedCount, 3);
+  return occupiedCount(newInputs);
+}
+
+
+const part2 = (inputs) => {
+  const newInputs = simulateSeating(inputs, firstSeatOccupiedCount, 4);
+  return occupiedCount(newInputs);
 }
 
 module.exports = {
   readInput, 
+  simulateSeating,
+  adjacentOccupiedCount,
+  firstSeatOccupiedCount,
   part1,
-  factorialCalculator,
-  combinationCalculator,
-  combinasonsMaxGap,
   part2 }
