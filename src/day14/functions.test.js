@@ -5,7 +5,7 @@ const {
   addrDecoder,
   part2 } = require('./functions');
 
-describe('test day5 solution ', () => {
+describe('test day14 solution ', () => {
   const dataset = [
     { mask: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X"},
     { addr: 8,

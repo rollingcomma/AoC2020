@@ -8,7 +8,7 @@ const {
   findOrderedFields
  } = require('./functions');
 
-describe('test day5 solution ', () => {
+describe('test day16 solution ', () => {
   const dataset = [
     {
       class: {first:[1, 3], second:[5, 7]},

@@ -3,7 +3,7 @@ const {
   part1,
   part2 } = require('./functions');
 
-describe('test day5 solution ', () => {
+describe('test day15 solution ', () => {
   const dataset = [
     [0, 3, 6],
     [1, 3, 2],
