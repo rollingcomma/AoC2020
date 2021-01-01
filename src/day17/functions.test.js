@@ -3,6 +3,8 @@ const {
   xLayerCount,
   expand,
   cycle,
+  cycle2,
+  expand2,
   part1,
   part2 } = require('./functions');
 
@@ -44,10 +46,17 @@ describe('test day17 solution ', () => {
   test('cycle - count active cube after cycle', () => {
     expect(cycle(expandedData, 0, 1)).toBe(11);
     expect(cycle(expand(dataset, 2), 0, 2)).toBe(21);
+    
   });
 
+  
   test('part1 - count active cubes after the sixth cycle for 3D array', () => {
     expect(part1(dataset)).toBe(112);
+  });
+
+  test('cycle2 - count active cube after cycle', () => {
+    expect(cycle2(expand2(dataset, 1), 0, 1)).toBe(29);
+   // expect(cycle(expand(dataset, 2), 0, 2)).toBe(21);
   });
 
   test('part2 - count active cubes after the sixth cycle for 4D array', () => {
