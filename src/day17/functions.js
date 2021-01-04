@@ -29,18 +29,17 @@ const xLayerCount = (position, cubes) => {
 
 const xLayerCount2 = (position, cubes) => {
   let count = 0;
-  //console.log(position);
   const [w, z, y, x] = position;
   const zLength = cubes.length;
   const length = cubes[0][0].length;
 
-  for (let k = -1; k <= 1; k++) {
-    for (let i = -1; i <= 1; i++) {
-      for (let j = -1; j <= 1; j++) {
-       
-        if ((w + k) >= 0 && (z + i) >= 0 && (y + j) >= 0 && (w + k) < zLength && (z + i) < zLength && (y + j) < length && cubes[w + k][z + i][y + j][x] === "#"){
-          count++;
-          //console.log(k, i, j);
+  for (let i = -1; i <= 1; i++) {
+    for (let j = -1; j <= 1; j++) {
+      for (let k = -1; k <= 1; k++) {
+        if ((w + i) >= 0 && (z + j) >= 0 && (y + k) >= 0 
+            && (w + i) < zLength && (z + j) < zLength && (y + k) < length 
+            && cubes[w + i][z + j][y + k][x] === "#"){
+              count++;
         }
       }
     }
@@ -54,6 +53,16 @@ const isActive = (key, activeNeighbor) => {
   return false;
 }
 
+/**
+ * Description: expand the input 2D array to a 3D array
+ * assuming input 2D array size -> [s][s]
+ * output 3D array size -> [2cycles+1][2cycles+s][2cycles+s]
+ * 
+ * @param {2d Array} inputs 
+ * @param {int} cycles
+ * *
+ * @returns {3D Array} cubes
+ */
 const expand = (inputs, cycles) => {
   const zSize = 2 * cycles + 1;
         inputSize = inputs.length,
@@ -78,33 +87,20 @@ const expand = (inputs, cycles) => {
   return cubes;
 }
 
-const expand2 = (inputs, cycles) => {
-  const zSize = 2 * cycles + 1;
-  inputSize = inputs.length,
-    cubeSize = inputSize + 2 * cycles,
-    cubes = [];
-  //initialize cubes - all cubes are inactive
-  for (let w = 0; w < zSize; w++) {
-    cubes[w] = []
-  for (let z = 0; z < zSize; z++) {
-    cubes[w][z] = []
-    for (let y = 0; y < cubeSize; y++) {
-      cubes[w][z][y] = []
-      for (let x = 0; x < cubeSize; x++) {
-        cubes[w][z][y][x] = ".";
-      }
-    }
-  }
-}
-  //update cubes with input state
-  for (let y = 0; y < inputSize; y++) {
-    for (let x = 0; x < inputSize; x++) {
-      cubes[cycles][cycles][y + cycles][x + cycles] = inputs[y][x];
-    }
-  }
-  return cubes;
-}
-
+/**
+ * Description:
+ * if cycles not equals to 0, recursively calculate and update cubes' lower layers state and populate the (middle + 1) with its reflection layer (middle - 1)
+ * if cycles equals to 0, return count
+ *
+ * 
+ * @param {3D Array} cubes 
+ * @param {int} count 
+ * @param {int} cycles 
+ * 
+ * base case
+ * @returns {int} count
+ * 
+ */
 const cycle = (cubes, count, cycles) => {
   //base case
   if (cycles === 0) return count;
@@ -140,6 +136,7 @@ const cycle = (cubes, count, cycles) => {
         neighborCount = key === "active" ? --neighborCount : neighborCount;
         if (isActive(key, neighborCount)) {
           newCubes[z][y][x] = "#";
+          //newCubes[zSize - z - 1][y][x] = "#";
           layerCount++;
         } else {
           newCubes[z][y][x] = ".";
@@ -149,32 +146,121 @@ const cycle = (cubes, count, cycles) => {
     activeCubeCount += z !== middleZ? 2 * layerCount : layerCount;
   }
   
-  for (let z = 1; z <= middleZ ; z++) {
-    newCubes[middleZ + z] = newCubes[middleZ - z];
-  }
+  /**
+   * The middle layer's state changes depending on the layer below it
+   * thus, new cubes only need to populate the (middleZ + 1) with its reflection layer (middleZ - 1)
+   */
+  newCubes[middleZ + 1] = newCubes[middleZ - 1];
+
   return cycle(newCubes, activeCubeCount, cycles - 1);
 }
 
+/**
+ * Part 2 pattern : 
+ *  - middle = (size of cube - 1) / 2
+ *  - assume cube are divided by middle layer into upper layers and lower layers
+ *  - upper layers are mirrors of lower layers at both w & z axis
+ * 
+ *   After 1 cycle:
+ *   w=0                  w=1                 w=2
+ *   z=0    1      2        0     1     2       0     1     2
+ *   #..   #..   #..       #..   #.#   #..     #..   #..   #..
+ *   ..#   ..#   ..#       ..#   .##   ..#     ..#   ..#   ..#
+ *   .#.   .#.   .#.       .#.   .#.   .#.     .#.   .#.   .#.
+ *   
+ *   
+ *   After 2 cycles:
+ *   w=0                                       1
+ *   z=0       1      2       3       4        z=0         1         2         3         4
+ *   .....   .....   ###..   .....   .....     .....     .....     .....     .....     .....
+ *   .....   .....   ##.##   .....   .....     .....     .....     .....     .....     .....
+ *   ..#..   .....   #...#   .....   ..#..     .....     .....     .....     .....     .....
+ *   .....   .....   .#..#   .....   .....     .....     .....     .....     .....     .....
+ *   .....   .....   .###.   .....   .....     .....     .....     .....     .....     .....
+ *   
+ *   w=2
+ *   z=0       1      2       3       4
+ *   ###..   .....   .....   .....   ###..
+ *   ##.##   .....   .....   .....   ##.##
+ *   #...#   .....   .....   .....   #...#
+ *   .#..#   .....   .....   .....   .#..#
+ *   .###.   .....   .....   .....   .###.
+ *   
+ *   w=3                                        4
+ *   z=0       1       2       3       4        z=0       1       2       3       4
+ *   .....   .....   .....   .....   .....      .....   .....   ###..   .....   .....
+ *   .....   .....   .....   .....   .....      .....   .....   ##.##   .....   .....
+ *   .....   .....   .....   .....   .....      ..#..   .....   #...#   .....   ..#..
+ *   .....   .....   .....   .....   .....      .....   .....   .#..#   .....   .....
+ *   .....   .....   .....   .....   .....      .....   .....   .###.   .....   .....
+ */
+
+
+/**
+ * Description: expand the input 2D array to a 4D array
+ * assuming input 2D array size -> [s][s]
+ * output 4D array size -> [2cycles+1][2cycles+1][2cycles+s][2cycles+s]
+ *
+ * @param {2d Array} inputs
+ * @param {int} cycles
+ * 
+ * @returns {4D Array} cubes
+ */
+const expand2 = (inputs, cycles) => {
+  const zSize = 2 * cycles + 1;
+  inputSize = inputs.length,
+    cubeSize = inputSize + 2 * cycles,
+    cubes = [];
+  //initialize cubes - all cubes are inactive
+  for (let w = 0; w < zSize; w++) {
+    cubes[w] = []
+    for (let z = 0; z < zSize; z++) {
+      cubes[w][z] = []
+      for (let y = 0; y < cubeSize; y++) {
+        cubes[w][z][y] = []
+        for (let x = 0; x < cubeSize; x++) {
+          cubes[w][z][y][x] = ".";
+        }
+      }
+    }
+  }
+  //update cubes with input state
+  for (let y = 0; y < inputSize; y++) {
+    for (let x = 0; x < inputSize; x++) {
+      cubes[cycles][cycles][y + cycles][x + cycles] = inputs[y][x];
+    }
+  }
+  return cubes;
+}
+
+/**
+ * Description: 
+ * if cycles not equals to 0, recursively calculate and update cubes' lower layers state and populate the (middle + 1) with its reflection layer (middle - 1)
+ * if cycles equals to 0, return count
+ * 
+ * @param {4D Array} cubes 
+ * @param {int} count 
+ * @param {int} cycles 
+ * 
+ * @returns {int} count
+ */
 const cycle2 = (cubes, count, cycles) => {
   //base case
-  console.log(count)
-  console.log(JSON.stringify(cubes))
   if (cycles === 0) return count;
-
+  
   const zSize = cubes.length;
-  middleZ = (zSize - 1) / 2;
-  cubeSize = cubes[0][0].length;
+        middle = (zSize - 1) / 2;
+        cubeSize = cubes[0][0].length;
 
   let previous = {},
-    newCubes = JSON.parse(JSON.stringify(cubes)),
-    neighborCount = 0
-    activeCubeCount = 0;
+      newCubes = JSON.parse(JSON.stringify(cubes)),
+      neighborCount = 0
+      activeCubeCount = 0;
 
-  for (let w = cycles - 1; w < middleZ + 1; w++) {
-    let layerCount = 0;
-    for (let z = cycles - 1; z < middleZ + 1; z++) {
-      //let layerCount = 0;
-      //let range = cubeSize - cycles + 1;
+  for (let w = cycles - 1; w <= middle; w++) {
+    let zCount = 0;
+    for (let z = cycles - 1; z <= middle; z++) {
+      let layerCount = 0;
       for (let y = 0; y < cubeSize; y++) {
         for (let x = 0; x < cubeSize; x++) {
           const key = cubes[w][z][y][x] === "#" ? "active" : "inactive";
@@ -190,7 +276,7 @@ const cycle2 = (cubes, count, cycles) => {
             previous.m = previous.r;
             previous.r = r;
           }
-
+          
           neighborCount = key === "active" ? --neighborCount : neighborCount;
           if (isActive(key, neighborCount)) {
             newCubes[w][z][y][x] = "#";
@@ -199,17 +285,26 @@ const cycle2 = (cubes, count, cycles) => {
             newCubes[w][z][y][x] = ".";
           }
         }
-        activeCubeCount += (z === middleZ && w === middleZ) ? layerCount : 2 * layerCount;
       }
+     
+      zCount += (z === middle)? layerCount : 2 * layerCount;
     }
-    //activeCubeCount += (w===middleZ)?
+    activeCubeCount += (w === middle)? zCount : 2 * zCount;
   }
 
-  for (let w = 1; w <= middleZ; w++) {
-    for (let z = 1; z <= middleZ; z++) {
-      newCubes[middleZ + w][middleZ + z] = newCubes[middleZ - w][middleZ - z];
-    }
+  /**
+   * The middle layer's state changes depending on the layer below it
+   * thus, new cubes only need to populate the (middle + 1) with its reflection layer (middle - 1)
+   * for both z & w axis
+   */
+  for (let w = cycles - 1; w <= middle; w++) {
+    newCubes[w][middle + 1] = newCubes[w][middle - 1];
   }
+
+  for (let z = cycles - 1 ; z <= zSize - cycles; z++) { 
+    newCubes[middle + 1][z] = newCubes[middle - 1][z];
+  }
+  
   return cycle2(newCubes, activeCubeCount, cycles - 1);
 }
 
@@ -220,7 +315,6 @@ const part1 = (inputs) => {
 
 const part2 = (inputs) => {
   const cubes = expand2(inputs, 6);
-  //console.log(JSON.stringify(cubes))
   return cycle2(cubes, 0, 6);
 } 
 
